@@ -34,9 +34,9 @@ git config --global user.email "Valeria03.mail@yandex.ru"
 git status
 ```
 
-`![git status]('Снимок экрана от 2025-11-12 14-43-38.png')`
-`![git status]('Снимок экрана от 2025-11-12 14-44-59.png')`
-`![git status]('Снимок экрана от 2025-11-12 14-45-59.png')`
+`![git status](~/Документы/git-project/sys-pattern-homework/'Снимок экрана от 2025-11-12 14-43-38.png')`
+`![git status](~/Документы/git-project/sys-pattern-homework/'Снимок экрана от 2025-11-12 14-44-59.png')`
+`![git status](~/Документы/git-project/sys-pattern-homework/'Снимок экрана от 2025-11-12 14-45-59.png')`
 
 
 ---
