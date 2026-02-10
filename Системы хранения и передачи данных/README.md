@@ -41,6 +41,7 @@ sudo systemctl status memcached
 
 
 Демонстрация работы memcached
+
 ![alt text](image.png)
 
 
