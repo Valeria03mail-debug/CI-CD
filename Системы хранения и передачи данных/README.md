@@ -87,25 +87,3 @@ exit
 ```
 Скриншот выполнения команд
 ![alt text](image-2.png)
-
----
-
-### Задание 5*
-
-Листинг команд
-
-```
-redis-cli
-scan 0
-SET key5 5
-INCRBY key5 5
-GET key5
-flushall
-exit
-```
-
-Скриншот выполнения команд:
-
-![alt text](image-3.png)
-
----
