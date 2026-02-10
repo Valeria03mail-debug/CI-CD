@@ -30,3 +30,60 @@
 
 ### Задание 2
 
+Установка memcached
+```
+sudo apt update
+sudo apt install memcached
+sudo systemctl enable memcached
+sudo systemctl start memcached
+sudo systemctl status memcached
+```
+
+
+Демонстрация работы memcached
+![alt text](image.png)
+
+
+---
+
+### Задание 3
+
+Листинг команд:
+
+```
+telnet 127.0.0.1 11211
+set key1 0 5 6
+value1
+set key2 0 5 6
+value2
+set key3 0 5 6
+value3
+get key1
+get key2
+get key3
+flush_all
+quit
+```
+
+Скриншот выполнения команд:
+
+![alt text](image-1.png)
+
+---
+
+### Задание 4
+
+Листинг команд
+
+```
+SET name "Lera"
+SET tasks_total 15
+KEYS *
+GET name
+GET tasks_total
+flushall
+exit
+
+```
+Скриншот выполнения команд
+![alt text](image-2.png)
