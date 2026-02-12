@@ -1,111 +1,132 @@
-# Домашнее задание к занятию "`Кеширование Redis/memcached`" - `Гаврилова Валерия`
+# Домашнее задание к занятию "`ELK`" - `Гаврилова Валерия`
 
 ### Задание 1
 
-Вот ключевые категории проблем, которые кеширование помогает решить:
-1. Проблемы производительности и скорости
-- Высокая задержка (latency) при доступе к данным.
-- Длительные вычисления.
-- «Горячие» данные (часто запрашиваемые).
+Установка elasticsearch, запуск и смена cluster_name
 
-2. Проблемы масштабируемости и нагрузки
-- Ограниченная пропускная способность основного источника.
-- Рост числа пользователей/запросов.
-- Проблемы «тёплого» запуска.
-  
-3. Проблемы доступности и отказоустойчивости
-- Частичные сбои внешних сервисов или БД.
-- Повышение доступности при сетевых проблемах.
+```
+sudo apt update
+sudo apt install openjdk-11-jdk -y
+java -version
+wget https://mirror.yandex.ru/mirrors/elastic/7/pool/main/e/elasticsearch/elasticsearch-7.17.25-amd64.deb
+sudo dpkg -i elasticsearch-7.17.25-amd64.deb
+sudo nano /etc/elasticsearch/elasticsearch.yml
+sudo nano /etc/elasticsearch/jvm.options
+sudo systemctl daemon-reload
+sudo systemctl enable elasticsearch
+sudo systemctl start elasticsearch
+systemctl status elasticsearch
+curl -X GET 'localhost:9200/_cluster/health?pretty'
+```
 
-4. Проблемы экономии ресурсов и стоимости
-- Высокая стоимость операций.
-- Экономия вычислительных ресурсов (CPU).
-- Сокращение сетевого трафика.
+Kонфигурационный файл elasticsearch.yml
+```
+cluster.name: Valeria_G
+node.name: node-1
+network.host: 0.0.0.0
+http.port: 9200
+discovery.type: single-node
+xpack.security.enabled: false
+```
 
-5. Проблемы согласованности и предсказуемости
-- «Всплески» нагрузки, которые сложно предсказать.
-- Улучшение пользовательского опыта (UX).
+Демонстрация работы:
 
-----
+![alt text](image-4.png)
+
+Смена cluster_name:
+
+![alt text](image-5.png)
+---
 
 ### Задание 2
 
-Установка memcached
+Листинг команд
 ```
-sudo apt update
-sudo apt install memcached
-sudo systemctl enable memcached
-sudo systemctl start memcached
-sudo systemctl status memcached
+cd /tmp
+wget https://mirror.yandex.ru/mirrors/elastic/7/pool/main/k/kibana/kibana-7.17.25-amd64.deb
+sudo dpkg -i kibana-7.17.25-amd64.deb
+sudo nano /etc/kibana/kibana.yml
+sudo systemctl daemon-reload
+sudo systemctl enable kibana
+sudo systemctl start kibana
+sudo systemctl status kibana
+sudo netstat -tulpn | grep 5601
 ```
 
+Kонфигурационный файл kibana.yml
+```
+server.port: 5601
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["http://localhost:9200"]
+elasticsearch.requestTimeout: 60000
+kibana.index: ".kibana"
+```
 
-Демонстрация работы memcached
+Выполнение запроса GET /_cluster/health?pretty 
 
-![alt text](image.png)
-
-
+![alt text](image-6.png)
 ---
 
 ### Задание 3
 
-Листинг команд:
-
+Листинг команд
 ```
-telnet 127.0.0.1 11211
-set key1 0 5 6
-value1
-set key2 0 5 6
-value2
-set key3 0 5 6
-value3
-get key1
-get key2
-get key3
-flush_all
-quit
+cd /tmp
+wget https://mirror.yandex.ru/mirrors/elastic/7/pool/main/l/logstash/logstash-7.17.25-amd64.deb
+sudo dpkg -i logstash-7.17.25-amd64.deb
+sudo nano /etc/logstash/jvm.options
+sudo nano /etc/logstash/conf.d/nginx.conf
+sudo systemctl daemon-reload
+sudo systemctl enable logstash
+sudo systemctl start logstash
+sudo systemctl status logstash
+curl -X GET 'localhost:9200/_cat/indices?v'
 ```
+Kонфигурационный файл nginx.conf
+```
+input {
+  file {
+    path => "/var/log/nginx/access.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+output {
+  stdout { 
+    codec => rubydebug 
+  }
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    index => "nginx-logs-%{+YYYY.MM.dd}"
+  }
+}
+```
+Итог запуска Logstash и Nginx:
 
-Скриншот выполнения команд:
-
-![alt text](image-1.png)
-
+![alt text](image-9.png)
 ---
 
 ### Задание 4
 
-Листинг команд
 
+Kонфигурационный файл filebeat.yml
 ```
-SET name "Lera"
-SET tasks_total 15
-KEYS *
-GET name
-GET tasks_total
-flushall
-exit
-```
-Скриншот выполнения команд
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+  fields:
+    service: nginx
+  fields_under_root: true
 
-![alt text](image-2.png)
----
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  index: "nginx-filebeat-%{+yyyy.MM.dd}"
 
-### Задание 5*
-
-Листинг команд
-
-```
-redis-cli
-scan 0
-SET key5 5
-INCRBY key5 5
-GET key5
-flushall
-exit
+setup.ilm.enabled: false
+setup.template.name: "nginx-filebeat"
+setup.template.pattern: "nginx-filebeat-*"
 ```
 
-Скриншот выполнения команд:
-
-![alt text](image-3.png)
-
----
+![alt text](image-8.png)
