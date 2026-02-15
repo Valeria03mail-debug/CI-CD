@@ -98,3 +98,6 @@ consumer.py:
 
 результат на первой
 ![alt text](image-14.png)
+
+результат на второй
+![alt text](image-15.png)
