@@ -49,7 +49,31 @@ WHERE first_name IN ('Kelly', 'Willie')
 ### Задание 5
 
 ```
+SELECT 
+    email AS full_email,
+    SUBSTRING_INDEX(email, '@', 1) AS username,
+    SUBSTRING_INDEX(email, '@', -1) AS domain
+FROM sakila.customer;
+```
+![alt text](image-8.png)
+---
+
+### Задание 6
 
 ```
-
+SELECT 
+    -- Преобразуем часть до @
+    CONCAT(
+        UPPER(LEFT(SUBSTRING_INDEX(email, '@', 1), 1)),
+        LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', 1), 2))
+    ) AS username,
+    
+    -- Преобразуем часть после @
+    CONCAT(
+        UPPER(LEFT(SUBSTRING_INDEX(email, '@', -1), 1)),
+        LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', -1), 2))
+    ) AS domain
+FROM sakila.customer;
+```
+![alt text](image-9.png)
 ---
