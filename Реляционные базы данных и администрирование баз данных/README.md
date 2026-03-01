@@ -1,60 +1,55 @@
-# Домашнее задание к занятию "`Работа с данными (DDL/DML)`" - `Гаврилова Валерия`
+# Домашнее задание к занятию "`Операции с данными в SQL`" - `Гаврилова Валерия`
 
 ### Задание 1
 
- Мне пришлось все делать немного по альтернативному методу, ведь в процессе работы возникало много ошибок. (например, создание таблиц вручную, т.к скрипт выдавал ошибки, плюсом были дополнительные проверки.)
-
 ```
-CREATE USER 'sys_temp'@'localhost' IDENTIFIED BY 'password';
-SELECT user, host FROM mysql.user;
-GRANT ALL PRIVILEGES ON *.* TO 'sys_temp'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-SHOW GRANTS FOR 'sys_temp'@'localhost';
-ALTER USER 'sys_temp'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
-FLUSH PRIVILEGES;
-CREATE DATABASE IF NOT EXISTS sakila;
-USE sakila;
-USE sakila;
-SHOW TABLES;
-DESCRIBE actor;
-DESCRIBE film;
-DESCRIBE customer;
-SELECT COUNT(*) FROM actor;
-SELECT COUNT(*) FROM film;
-SELECT COUNT(*) FROM customer;
+SELECT DISTINCT district
+FROM sakila.address
+WHERE district LIKE 'K%a'
+  AND district NOT LIKE '% %';
 ```
 
-Результат запроса, где в списке виден созданный пользователь sys_temp
-
-![alt text](image.png)
-
-Выдача и проверка всех прав у пользователя
-
-![alt text](image-1.png)
-
-ER-диаграммa базы данных sakila
-
-![alt text](sakila.png)
+![alt text](image-4.png)
 ---
 
 ### Задание 2
 
-Таблица с первичными ключами (регистр везде должен быть низким, но к сожалению этого не везде удалось добиться.)
-
-![alt text](image-2.png)
+```
+SELECT *
+FROM sakila.payment
+WHERE payment_date BETWEEN '2005-06-15' AND '2005-06-18 23:59:59'
+  AND amount > 10.00;
+```
+![alt text](image-5.png)
 ---
 
 ### Задание 3
 
 ```
-SHOW GRANTS FOR 'sys_temp'@'localhost';
-REVOKE INSERT ON sakila.* FROM 'sys_temp'@'localhost';
-REVOKE UPDATE ON sakila.* FROM 'sys_temp'@'localhost';
-REVOKE DELETE ON sakila.* FROM 'sys_temp'@'localhost';
-FLUSH PRIVILEGES;
-SHOW GRANTS FOR 'sys_temp'@'localhost';
+SELECT *
+FROM sakila.rental
+ORDER BY rental_date DESC
+LIMIT 5;
 ```
-Результат выполнения удаления прав у пользователя
+![alt text](image-6.png)
+---
 
-![alt text](image-3.png)
+### Задание 4
+
+```
+SELECT 
+    REPLACE(LOWER(first_name), 'll', 'pp') AS first_name,
+    LOWER(last_name) AS last_name
+FROM sakila.customer
+WHERE first_name IN ('Kelly', 'Willie')
+  AND active = 1;
+```
+![alt text](image-7.png)
+---
+### Задание 5
+
+```
+
+```
+
 ---
