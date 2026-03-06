@@ -1,79 +1,46 @@
-# Домашнее задание к занятию "`Операции с данными в SQL`" - `Гаврилова Валерия`
+# Домашнее задание к занятию "`SQL. Часть 2`" - `Гаврилова Валерия`
 
 ### Задание 1
 
 ```
-SELECT DISTINCT district
-FROM sakila.address
-WHERE district LIKE 'K%a'
-  AND district NOT LIKE '% %';
+SELECT 
+    CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+    c.city AS store_city,
+    COUNT(cu.customer_id) AS customer_count
+FROM customer cu
+JOIN store st ON cu.store_id = st.store_id
+JOIN staff s ON st.manager_staff_id = s.staff_id
+JOIN address a ON st.address_id = a.address_id
+JOIN city c ON a.city_id = c.city_id
+GROUP BY cu.store_id, s.first_name, s.last_name, c.city
+HAVING COUNT(cu.customer_id) > 300;
 ```
-
-![alt text](image-4.png)
+![alt text](image-10.png)
 ---
 
 ### Задание 2
 
 ```
-SELECT *
-FROM sakila.payment
-WHERE payment_date BETWEEN '2005-06-15' AND '2005-06-18 23:59:59'
-  AND amount > 10.00;
+SELECT COUNT(*) AS films_above_average
+FROM film
+WHERE length > (SELECT AVG(length) FROM film);
 ```
-![alt text](image-5.png)
+
+![alt text](image-11.png)
 ---
 
 ### Задание 3
 
 ```
-SELECT *
-FROM sakila.rental
-ORDER BY rental_date DESC
-LIMIT 5;
-```
-![alt text](image-6.png)
----
-
-### Задание 4
-
-```
 SELECT 
-    REPLACE(LOWER(first_name), 'll', 'pp') AS first_name,
-    LOWER(last_name) AS last_name
-FROM sakila.customer
-WHERE first_name IN ('Kelly', 'Willie')
-  AND active = 1;
+    DATE_FORMAT(p.payment_date, '%Y-%m') AS month,
+    SUM(p.amount) AS total_payments,
+    COUNT(DISTINCT r.rental_id) AS rental_count
+FROM payment p
+LEFT JOIN rental r ON DATE_FORMAT(p.payment_date, '%Y-%m') = DATE_FORMAT(r.rental_date, '%Y-%m')
+GROUP BY DATE_FORMAT(p.payment_date, '%Y-%m')
+ORDER BY total_payments DESC
+LIMIT 1;
 ```
-![alt text](image-7.png)
----
-### Задание 5
-
-```
-SELECT 
-    email AS full_email,
-    SUBSTRING_INDEX(email, '@', 1) AS username,
-    SUBSTRING_INDEX(email, '@', -1) AS domain
-FROM sakila.customer;
-```
-![alt text](image-8.png)
----
-
-### Задание 6
-
-```
-SELECT 
-    -- Преобразуем часть до @
-    CONCAT(
-        UPPER(LEFT(SUBSTRING_INDEX(email, '@', 1), 1)),
-        LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', 1), 2))
-    ) AS username,
-    
-    -- Преобразуем часть после @
-    CONCAT(
-        UPPER(LEFT(SUBSTRING_INDEX(email, '@', -1), 1)),
-        LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', -1), 2))
-    ) AS domain
-FROM sakila.customer;
-```
-![alt text](image-9.png)
+![alt text](image-12.png)
 ---
