@@ -1,46 +1,15 @@
-# Домашнее задание к занятию "`SQL. Часть 2`" - `Гаврилова Валерия`
+# Домашнее задание к занятию "`Репликация и масштабирование. Часть 1`" - `Гаврилова Валерия`
 
 ### Задание 1
 
-```
-SELECT 
-    CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
-    c.city AS store_city,
-    COUNT(cu.customer_id) AS customer_count
-FROM customer cu
-JOIN store st ON cu.store_id = st.store_id
-JOIN staff s ON st.manager_staff_id = s.staff_id
-JOIN address a ON st.address_id = a.address_id
-JOIN city c ON a.city_id = c.city_id
-GROUP BY cu.store_id, s.first_name, s.last_name, c.city
-HAVING COUNT(cu.customer_id) > 300;
-```
-![alt text](image-10.png)
----
+Master-Slave: 
+Его суть в том, что есть один главный сервер (Master), который принимает все запросы на запись (добавление, изменение данных). Он передает изменения подчиненным серверам (Slaves). Slave-серверы же работают только на чтение данных. Они являются «копиями» мастера.
+Эта репликация хорошо подходит для распределения нагрузки (чтение идет с нескольких серверов) и создания резервных копий, но если Master выйдет из строя, запись данных остановится, пока не назначить новый мастер вручную или автоматически.
+
+Master-Master:
+Его суть такова, что оба сервера являются главными. Каждый из них принимает запросы и на запись, и на чтение. Они постоянно синхронизируются друг с другом.
+В этой схеме высокая отказоустойчивость (если один упал, запись идет через второй) и возможность писать в оба сервера (например, если пользователи физически находятся в разных регионах), но есть сложность в настройке и риск конфликтов (если одновременно изменить одну и ту же запись на обоих серверах).
+
+Главное же отличие в том, что в схеме Master-Slave писать можно только в одну базу и читать — со многих, а в схеме Master-Master можно писать (и читать) сразу в оба сервера.
 
 ### Задание 2
-
-```
-SELECT COUNT(*) AS films_above_average
-FROM film
-WHERE length > (SELECT AVG(length) FROM film);
-```
-
-![alt text](image-11.png)
----
-
-### Задание 3
-
-```
-SELECT 
-    DATE_FORMAT(p.payment_date, '%Y-%m') AS month,
-    SUM(p.amount) AS total_payments,
-    COUNT(DISTINCT r.rental_id) AS rental_count
-FROM payment p
-LEFT JOIN rental r ON DATE_FORMAT(p.payment_date, '%Y-%m') = DATE_FORMAT(r.rental_date, '%Y-%m')
-GROUP BY DATE_FORMAT(p.payment_date, '%Y-%m')
-ORDER BY total_payments DESC
-LIMIT 1;
-```
-![alt text](image-12.png)
----
