@@ -7,27 +7,49 @@
 Разрешенные сетевые службы:
 
 Порт 21/tcp — FTP (vsftpd 2.3.4)
+
 Порт 22/tcp — SSH (OpenSSH 4.7p1)
+
 Порт 23/tcp — Telnet (Linux telnetd)
+
 Порт 25/tcp — SMTP (Postfix smtpd)
+
 Порт 53/tcp — DNS (ISC BIND 9.4.2)
+
 Порт 80/tcp — HTTP (Apache httpd 2.2.8)
+
 Порт 111/tcp — RPC (rpcbind 2)
+
 Порт 139/tcp — NetBIOS (Samba smbd 3.X-4.X)
+
 Порт 445/tcp — SMB (Samba smbd 3.X-4.X)
+
 Порт 512/tcp — exec (rexecd)
+
 Порт 513/tcp — login (rlogind)
+
 Порт 514/tcp — shell (rshd)
+
 Порт 1099/tcp — Java RMI (GNU Classpath grmiregistry)
+
 Порт 1524/tcp — bindshell (Metasploitable root shell)
+
 Порт 2049/tcp — NFS (Network File System 2-4)
+
 Порт 2121/tcp — FTP (ProFTPD 1.3.1)
+
 Порт 3306/tcp — MySQL (MySQL 5.0.51a)
+
 Порт 5432/tcp — PostgreSQL (PostgreSQL 8.3.0-8.3.7)
+
 Порт 5900/tcp — VNC (VNC protocol 3.3)
+
 Порт 6000/tcp — X11 (X Window System)
+
 Порт 6667/tcp — IRC (UnrealIRCd)
+
 Порт 8009/tcp — AJP (Apache Jserv Protocol v1.3)
+
 Порт 8180/tcp — HTTP (Apache Tomcat/Coyote JSP engine 1.1)
 
 На основе этих версий служб, найдено три критических уязвимости:
@@ -47,6 +69,7 @@ Samba версии 3.0.20 (определяется по версии в Metaspl
 Ссылка на Exploit-DB: https://www.exploit-db.com/exploits/16320
 
 Сканирование показало, что на системе открыто 23 порта, на которых работают различные сетевые службы, включая FTP (vsftpd 2.3.4), SSH (OpenSSH 4.7p1), Telnet, HTTP (Apache 2.2.8), Samba, MySQL, PostgreSQL, VNC и IRC (UnrealIRCd). Многие из этих служб используют устаревшие версии программного обеспечения, что делает систему уязвимой.
+
 ---
 
 ### Задание 2
@@ -95,4 +118,5 @@ Wireshark фильтр: udp
 ![alt text](image-5.png)
 
 Характер ответа сервера зависит от состояния порта и используемого режима сканирования. При SYN-сканировании открытый порт отвечает SYN/ACK, закрытый — RST. При FIN и Xmas сканировании открытые порты (на UNIX-подобных системах, включая Metasploitable) игнорируют такие пакеты и не отправляют ответа, в то время как закрытые порты отвечают RST в соответствии с RFC 793. При UDP-сканировании закрытые порты возвращают ICMP-сообщение "Port Unreachable" (type 3, code 3), а открытые порты либо отвечают UDP-пакетом (если служба активна), либо не отвечают вовсе.
+
 ---
