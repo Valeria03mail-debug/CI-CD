@@ -1,83 +1,59 @@
-# Домашнее задание к занятию "`Защита хоста`" - `Гаврилова Валерия`
+# Домашнее задание к занятию "`Защита сети`" - `Гаврилова Валерия`
 
 ### Задание 1
 
+Защищаемая система (Ubuntu): IP-адрес 192.168.31.164
+Система злоумышленника (Kali): IP-адрес 192.168.31.216
+
+Все команды nmap выполнялись с Kali.
+
+TCP ACK сканирование (-sA)
 ```
-sudo apt update
-sudo apt install ecryptfs-utils -y
-sudo useradd -m -s /bin/bash cryptouser
-sudo passwd cryptouser
-sudo pkill -u cryptouser
-sudo ecryptfs-migrate-home -u cryptouser
-sudo login
- # логин: cryptouser
- # пароль: ...
-ls -la /home/cryptouser
+sudo nmap -sA 192.168.31.164
 ```
-после создания пользователя, но до шифрования:
-![alt text](image-6.png)
+![alt text](image-15.png)
 
+TCP Connect сканирование (-sT)
 ```
-echo "secret data" > /home/cryptouser/test.txt
-ls -la /home/cryptouser
-sudo ls -la /home/cryptouser
+sudo nmap -sT 192.168.31.164
 ```
-после шифрования, из-под root:
+![alt text](image-16.png)
 
-![alt text](image-7.png)
-
-вход под cryptouser после шифрования:
-
-![alt text](image-8.png)
----
-
-### Задание 2
-
+TCP SYN сканирование (-sS)
 ```
-sudo apt update
-sudo apt install cryptsetup -y
-dd if=/dev/zero of=~/luks-container.img bs=1M count=100
-sudo losetup -fP ~/luks-container.img
-sudo losetup -l
+sudo nmap -sS 192.168.31.164
 ```
-Создание контейнера/раздела
+![alt text](image-17.png)
 
-![alt text](image-9.png)
-![alt text](image-10.png)
-
+Определение версий служб (-sV)
 ```
-sudo cryptsetup luksFormat /dev/loop33
+sudo nmap -sV 192.168.31.164
 ```
-Инициализация LUKS
+![alt text](image-18.png)
 
-![alt text](image-11.png)
+На защищаемой системе открыты и доступны следующие сетевые службы:
+- SSH (22) – OpenSSH 9.6p1
+- SMTP (25) – Postfix
+- HTTP (80) – nginx 1.24.0
+- HTTP (8080) – Jetty 12.0.25
+- HTTP (9200) – Elasticsearch REST API 7.17.25
 
+События в логах Suricata
+После выполнения всех типов сканирования в логе /var/log/suricata/fast.log появились следующие события:
+
+![alt text](image-19.png)
+
+Suricata сработала на правило ET SCAN Possible Nmap User-Agent Observed, которое детектирует характерный User-Agent, который Nmap использует при HTTP-сканировании и другие  признаки. Все алерты указывают на то, что с IP-адреса 192.168.31.216 (Kali) проводится сканирование портов (80, 8080, 9200). Классификация «Web Application Attack» и высокий приоритет (1) говорят о том, что IDS расценивает действия как подготовку к атаке.
+
+События в логах Fail2Ban:
+При простом сканировании nmap Fail2Ban не срабатывает, так как он реагирует только на неудачные попытки аутентификации. Однако при тестировании защиты SSH были выполнены три последовательные попытки входа с неверным паролем с Kali:
 ```
-sudo cryptsetup open /dev/loop33 myencrypted
-ls -la /dev/mapper/myencrypted
-sudo mkfs.ext4 /dev/mapper/myencrypted
+ssh vvvv@192.168.31.164
 ```
-Открытие и создание ФС
+![alt text](image-20.png)
 
-![alt text](image-12.png)
+В логе /var/log/fail2ban.log зафиксировано:
 
-```
-sudo mkdir /mnt/secret
-sudo mount /dev/mapper/myencrypted /mnt/secret
-df -h | grep secret
-echo "Секретные данные" | sudo tee /mnt/secret/test.txt
-sudo cat /mnt/secret/test.txt
-ls -la /mnt/secret/
-```
-Монтирование и создание файлов
+![alt text](image-21.png)
 
-![alt text](image-13.png)
-
-```
-sudo umount /mnt/secret
-sudo cryptsetup close myencrypted
-sudo hexdump -C /dev/loop0 | head -20
-```
-Демонстрация шифрования 
-
-![alt text](image-14.png)
+Fail2Ban отслеживает логи аутентификации (/var/log/auth.log). После трёх неудачных попыток входа по SSH (параметр maxretry = 3 в настройках jail sshd) IP-адрес атакующего был автоматически заблокирован на уровне iptables на время, указанное в bantime (3600 секунд). Это демонстрирует работу Fail2Ban как инструмента активной защиты от брутфорс-атак.
