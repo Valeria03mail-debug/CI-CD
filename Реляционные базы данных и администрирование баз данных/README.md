@@ -65,4 +65,30 @@ pg_restore --clean -U postgres -h localhost -p 5432 -d restored_database -v myda
 
 ### Задание 3
 
+Пример команды инкрементного резервного копирования
 
+Для выполнения инкрементного резервного копирования в MySQL используется утилита mysqlbackup.
+
+Базовая команда для создания инкрементной копии:
+
+```
+mysqlbackup --user=backup_user --password --incremental \
+--incremental-base=history:last_backup \
+--backup-dir=/path/to/incremental_dir backup
+```
+
+Пример с указанием типа сканирования:
+
+```
+mysqlbackup --user=root --password --incremental=page-track \
+--incremental-base=history:last_backup \
+--backup-dir=/backups/mysql/incr backup
+```
+
+Инкрементный бэкап сам по себе не является готовой к использованию базой данных. Чтобы его применить, необходимо выполнить процедуру подготовки. Сначала подготавливается полная копия, а затем на нее последовательно "накатываются" все инкрементные изменения с помощью ключа apply-incremental-backup.
+
+```
+mysqlbackup --backup-dir=/full/backup/path \
+--incremental-backup-dir=/path/to/incremental_dir apply-incremental-backup
+```
+---
